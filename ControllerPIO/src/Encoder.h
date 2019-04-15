@@ -5,7 +5,7 @@
 #include <i2cEncoderLib.h> // https://github.com/Fattoresaimon/i2cencoder
 
 
-i2cEncoderLibV1 encoder(0x30); 
+i2cEncoderLib encoder(0x30); 
 
 typedef void ( *ValueChangedCallback )( int value );
 typedef void ( *ButtonPushedCallback )( void );
