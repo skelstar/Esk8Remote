@@ -2,7 +2,7 @@
 // #include <EncoderBasicModule.h>
 // #include <Rotary.h>
 #include <Wire.h>
-#include <i2cEncoderLib.h> // https://github.com/Fattoresaimon/i2cencoder
+#include <i2cEncoder.h> // https://github.com/Fattoresaimon/i2cencoder
 
 
 i2cEncoderLib encoder(0x30); 
