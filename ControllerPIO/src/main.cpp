@@ -26,11 +26,11 @@ nrf24_comms nrf24;
 unsigned long finishedSending = 0.0;
 
 void packetAvailableCallback( uint16_t from ) {
-    if (millis() - finishedSending > 20) {
-        Serial.printf("Round trip time: %u (time idle: %u) \n", 
-            millis() - nrf24.controllerPacket.id, 
-            millis() - finishedSending);
-    }
+  if (millis() - finishedSending > 20) {
+    Serial.printf("Round trip time: %u (time idle: %u) \n", 
+      millis() - nrf24.controllerPacket.id, 
+      millis() - finishedSending);
+  }
 }
 
 int joystickDeadZone = 3;
@@ -42,9 +42,9 @@ int joystickMax = 246;
 #define ENCODER_COUNTER_MAX	12 		// acceleration (ie 15 divides 127-255 into 15)
 
 byte mapEncoderToThrottle(int value) {
-    return value > 0
-        ? map(value, 0, ENCODER_COUNTER_MAX, 127, 255)
-        : map(value, ENCODER_COUNTER_MIN, 0, 0, 127);
+  return value > 0
+    ? map(value, 0, ENCODER_COUNTER_MAX, 127, 255)
+    : map(value, ENCODER_COUNTER_MIN, 0, 0, 127);
 }
 
 //--------------------------------------------------------------------------------
@@ -60,6 +60,10 @@ void encoderChangedCallback( int value ) {
 
 void encoderPushedCallback() {
   Serial.printf("Encoder button pushed!\n");
+}
+
+void encoderDoubleClickCallback() {
+  Serial.printf("encoderDoubleClickCallback()\n");
 }
 
 bool encoderCanAccelerate() {
@@ -78,16 +82,16 @@ void deadmanSwitchListener(int eventCode, int eventPin, int eventParam) {
   }
 }
 
-
 //--------------------------------------------------------------------------------
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   setupEncoder(
     ENCODER_COUNTER_MAX, 
     ENCODER_COUNTER_MIN, 
     encoderChangedCallback,
     encoderPushedCallback,
+    encoderDoubleClickCallback,
     encoderCanAccelerate);
 
   SPI.begin();                                           // Bring up the RF network
@@ -99,7 +103,7 @@ void setup() {
 
 long now = 0;
 
-#define SEND_PERIOD  200
+#define SEND_PERIOD  500
 
 void loop() {
 
@@ -110,16 +114,15 @@ void loop() {
   updateEncoder();
 
   if ( millis() - now > SEND_PERIOD ) {
-      now = millis();
-      nrf24.controllerPacket.id = millis();
-      if ( nrf24.sendPacketToBoard() ) {
-          finishedSending = millis();
-          // Serial.printf("Sent %u to Board\n", nrf24.controllerPacket.id);
-      }
-      else {
-          Serial.printf("Error sending to Board!\n");
-      }
+    now = millis();
+    nrf24.controllerPacket.id = millis();
+    if ( nrf24.sendPacketToBoard() ) {
+      finishedSending = millis();
+    }
+    else {
+      Serial.printf("Error sending to Board!\n");
+    }
   }
 
-  delay(1);
+  delay(100);
 }
