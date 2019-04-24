@@ -9,8 +9,8 @@
 /* DEV Board */
 // #define SPI_CE        33    	// white/purple
 // #define SPI_CS        26  	// green
-/* M5Stack */
 
+/* M5Stack */
 #define BUTTON_A_PIN 39
 #define BUTTON_B_PIN 38
 #define BUTTON_C_PIN 37
@@ -23,7 +23,7 @@ RF24Network network(radio);
 
 nrf24_comms nrf24;
 
-unsigned long finishedSending = 0;
+unsigned long finishedSending = 0.0;
 
 void packetAvailableCallback( uint16_t from ) {
     if (millis() - finishedSending > 20) {
@@ -32,6 +32,22 @@ void packetAvailableCallback( uint16_t from ) {
             millis() - finishedSending);
     }
 }
+
+int joystickDeadZone = 3;
+int joystickMin = 11;
+int joystickMiddle = 127;
+int joystickMax = 246;	
+
+#define ENCODER_COUNTER_MIN	-18 	// decceleration (ie -20 divides 0-127 into 20)
+#define ENCODER_COUNTER_MAX	12 		// acceleration (ie 15 divides 127-255 into 15)
+
+byte mapEncoderToThrottle(int value) {
+    return value > 0
+        ? map(value, 0, ENCODER_COUNTER_MAX, 127, 255)
+        : map(value, ENCODER_COUNTER_MIN, 0, 0, 127);
+}
+
+//--------------------------------------------------------------------------------
 
 #define ENCODER_COUNTER_MIN	-18 	// decceleration (ie -20 divides 0-127 into 20)
 #define ENCODER_COUNTER_MAX	12 		// acceleration (ie 15 divides 127-255 into 15)
@@ -78,7 +94,7 @@ void setup() {
   radio.begin();
   radio.setAutoAck(true);
 
-  nrf24.begin(&radio, &network, nrf24.RF24_CONTROLLER, packetAvailableCallback);
+  nrf24.begin(&radio, &network, /*role*/nrf24.RF24_CONTROLLER, /*callback*/packetAvailableCallback);
 }
 
 long now = 0;
@@ -106,15 +122,4 @@ void loop() {
   }
 
   delay(1);
-}
-//--------------------------------------------------------------------------------
-int joystickDeadZone = 3;
-int joystickMin = 11;
-int joystickMiddle = 127;
-int joystickMax = 246;	
-
-byte mapEncoderToThrottle(int value) {
-    return value > 0
-        ? map(value, 0, ENCODER_COUNTER_MAX, 127, 255)
-        : map(value, ENCODER_COUNTER_MIN, 0, 0, 127);
 }
