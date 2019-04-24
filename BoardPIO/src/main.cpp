@@ -49,7 +49,7 @@ void packetAvailableCallback( uint16_t from ) {
 //--------------------------------------------------------------------------------
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.printf("\nReady\n");
 
   vesc.init(115200);
@@ -60,7 +60,6 @@ void setup() {
 
   nrf24.begin(&radio, &network, nrf24.RF24_BOARD, packetAvailableCallback);
 }
-
 
 long now = 0;
 
