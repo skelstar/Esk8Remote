@@ -33,6 +33,8 @@ unsigned long firstPacketMillisDiff = 0;
 void packetAvailableCallback( uint16_t from ) {
   nrf24.boardPacket.id = millis();
 
+  vesc.setNunchuckValues(127, nrf24.controllerPacket.throttle, nrf24.controllerPacket.buttonC == true, 0);
+
   bool success = vesc.fetch_packet( vesc_packet ) > 0;
   if ( success ) {
     vescdata.batteryVoltage = vesc.get_voltage(vesc_packet);

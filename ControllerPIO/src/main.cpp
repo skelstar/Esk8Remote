@@ -49,12 +49,33 @@ byte mapEncoderToThrottle(int value) {
 
 //--------------------------------------------------------------------------------
 
+#define PULLUP		true
+#define OFFSTATE	HIGH
+void deadmanSwitchListener(int eventCode, int eventPin, int eventParam);
+myPushButton deadmanSwitch(BUTTON_A_PIN, PULLUP, OFFSTATE, deadmanSwitchListener);
+void deadmanSwitchListener(int eventCode, int eventPin, int eventParam) {
+    
+	if ( eventCode == deadmanSwitch.EV_RELEASED ) {
+    updateEncoder(/*force*/1);
+  }
+}
+
+void buttonBListener(int eventCode, int eventPin, int eventParam);
+myPushButton buttonB(BUTTON_B_PIN, PULLUP, OFFSTATE, buttonBListener);
+void buttonBListener(int eventCode, int eventPin, int eventParam) {
+  if ( eventCode == deadmanSwitch.EV_RELEASED ) {
+    setEncoderCounter(0);
+    updateEncoder(1);
+  }
+}
+
 #define ENCODER_COUNTER_MIN	-18 	// decceleration (ie -20 divides 0-127 into 20)
 #define ENCODER_COUNTER_MAX	12 		// acceleration (ie 15 divides 127-255 into 15)
 
 void encoderChangedCallback( int value ) {
   // apply logic including deadman switch here
   nrf24.controllerPacket.throttle = mapEncoderToThrottle( value );
+  nrf24.controllerPacket.buttonC = buttonB.isPressed(); // digitalRead( BUTTON_B_PIN ) == 1;
   Serial.printf("encoderChangedCallback: %d %d \n", value, nrf24.controllerPacket.throttle);
 }
 
@@ -70,17 +91,6 @@ bool encoderCanAccelerate() {
   return digitalRead( BUTTON_A_PIN ) == 0;
 }
 
-
-#define PULLUP		true
-#define OFFSTATE	HIGH
-void deadmanSwitchListener(int eventCode, int eventPin, int eventParam);
-myPushButton deadmanSwitch(BUTTON_A_PIN, PULLUP, OFFSTATE, deadmanSwitchListener);
-void deadmanSwitchListener(int eventCode, int eventPin, int eventParam) {
-    
-	if ( eventCode == deadmanSwitch.EV_RELEASED ) {
-    updateEncoder(1);
-  }
-}
 
 //--------------------------------------------------------------------------------
 void setup() {
@@ -110,6 +120,7 @@ void loop() {
   nrf24.update();
 
   deadmanSwitch.serviceEvents();
+  buttonB.serviceEvents();
 
   updateEncoder();
 

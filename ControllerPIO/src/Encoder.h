@@ -29,7 +29,7 @@ void setupEncoder(
 	encoder.begin(
     i2cEncoderLibV2::INT_DATA | 
     i2cEncoderLibV2::WRAP_DISABLE |
-    i2cEncoderLibV2::DIRE_LEFT | 
+    i2cEncoderLibV2::DIRE_RIGHT | 
     i2cEncoderLibV2::IPUP_ENABLE |
     i2cEncoderLibV2::RMOD_X1 | 
     i2cEncoderLibV2::STD_ENCODER);
@@ -48,6 +48,7 @@ void setupEncoder(
 
 void setEncoderCounter(int value) {
   counter = value;
+  encoder.writeCounter(value);
 }
 
 void updateEncoder(bool force = false) {
